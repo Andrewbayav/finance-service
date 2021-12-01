@@ -1,5 +1,6 @@
 package finance.service.entity;
 
+import finance.service.dto.YahooStockStatisticsDto;
 import lombok.Data;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -7,6 +8,7 @@ import org.json.JSONObject;
 @Data
 public class PortfolioEntry {
 
+    // portfolio block
     private double purchasePrice; // цена покупки
     private int quantity; // кол-во в портфеле
     private double expectedYield; // прибыль сегодня
@@ -24,6 +26,11 @@ public class PortfolioEntry {
     private double sumEUR; // суммарная стоимость позиции
     private double sumRUB; // суммарная стоимость позиции
 
+    // statistics block
+    private double enterpriseValue;
+    private double forwardPE;
+    private double priceToBook;
+    private double enterpriseToEbitda;
 
     public PortfolioEntry(JSONObject entry, double USD_RUB, double EUR_RUB, double USD_EUR) throws JSONException {
         this.USD_RUB = USD_RUB;
@@ -57,5 +64,12 @@ public class PortfolioEntry {
         this.type = entry.getString("instrumentType");
         this.name = entry.getString("name");
         this.ticker = entry.getString("ticker");
+    }
+
+    public void addStatistics(YahooStockStatisticsDto yahooStockStatisticsDto) {
+        this.enterpriseValue = yahooStockStatisticsDto.getEnterpriseValue();
+        this.forwardPE = yahooStockStatisticsDto.getForwardPE();
+        this.priceToBook = yahooStockStatisticsDto.getPriceToBook();
+        this.enterpriseToEbitda = yahooStockStatisticsDto.getEnterpriseToEbitda();
     }
 }

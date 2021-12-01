@@ -13,6 +13,8 @@ import java.net.http.HttpResponse;
 
 public class HttpUtil {
 
+    // TODO: Сделть одну утилиту отправки запросов
+
     public static String sendYahooTickerRequest(String apiUrl, String ticker, String params) throws IOException, InterruptedException {
         String url = apiUrl.concat(ticker).concat(params);
         HttpClient client = HttpClient.newHttpClient();

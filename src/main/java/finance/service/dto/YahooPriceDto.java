@@ -1,6 +1,6 @@
 package finance.service.dto;
 
-public class YahooStockDto {
+public class YahooPriceDto {
     public String getTicker() {
         return ticker;
     }
@@ -17,7 +17,7 @@ public class YahooStockDto {
     private String name;
     private double price;
 
-    public YahooStockDto(String ticker, String name, double price) {
+    public YahooPriceDto(String ticker, String name, double price) {
         this.ticker = ticker;
         this.name = name;
         this.price = price;

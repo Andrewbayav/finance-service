@@ -1,7 +1,7 @@
 package finance.service.entity;
 
 
-import finance.service.dto.YahooStockDto;
+import finance.service.dto.YahooPriceDto;
 
 import javax.persistence.*;
 
@@ -22,7 +22,7 @@ public class Stock {
     @Column
     private double price;
 
-    public Stock(YahooStockDto stockDto) {
+    public Stock(YahooPriceDto stockDto) {
         this.ticker = stockDto.getTicker();
         this.name = stockDto.getName();
         this.price = stockDto.getPrice();
