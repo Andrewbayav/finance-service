@@ -1,70 +1,65 @@
 package finance.service.service;
 
-import finance.service.entity.PortfolioEntry;
-import lombok.RequiredArgsConstructor;
+import finance.service.dto.OverviewDto;
+import finance.service.dto.TcsTickerDto;
+import finance.service.dto.YahooFinancialDto;
+import finance.service.dto.YahooStatisticsDto;
+import finance.service.dto.YahooSummaryDto;
+import finance.service.entity.PortfolioEntity;
+import finance.service.entity.TcsTickerEntity;
+import finance.service.entity.YahooFinancialEntity;
+import finance.service.entity.YahooStatisticsEntity;
+import finance.service.entity.YahooSummaryEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import finance.service.dto.YahooStockDto;
-import finance.service.entity.Stock;
-import finance.service.repository.StockRepository;
-import finance.service.utils.HttpUtil;
-import finance.service.utils.JsonParserUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class StockService {
 
-    @Value("${yahoo.api.url}")
-    private String yahooApiUrl;
-
-    @Value("${yahoo.params}")
-    private String yahooParams;
-
-    @Value("${tinkoff.api.url}")
-    private String tinkoffApiUrl;
-
-    @Value("${tinkoff.api.url.portfolio}")
-    private String portfolioEndpoint;
+    private final TcsService tcsService;
+    private final YahooStockService yahooStockService;
+    private final RepositoryService repositoryService;
 
     @Autowired
-    private final StockRepository stockRepository;
-
-    public void saveStock(Stock stock){
-        stockRepository.save(stock);
+    public StockService(
+            TcsService tcsService,
+            YahooStockService yahooStockService,
+            RepositoryService repositoryService) {
+        this.tcsService = tcsService;
+        this.yahooStockService = yahooStockService;
+        this.repositoryService = repositoryService;
     }
 
-    public YahooStockDto getYahooStockInfo(String ticker) throws IOException, InterruptedException {
-        log.info("Send request for ticker: " + ticker);
-        String responseBody = HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooParams);
-        return JsonParserUtil.jsonObjectToStockDto(responseBody);
+    public List<OverviewDto> getLatestAvailableData() {
+        PortfolioEntity latest = repositoryService.getLatestPortfolioEntity();
+        return repositoryService.getOverviewDtos(latest.getUuid());
     }
 
-    public double getCurrencyPairRate(String pairTicker) throws IOException, InterruptedException {
-        YahooStockDto yahooStockDto = getYahooStockInfo(pairTicker);
-        return  yahooStockDto.getPrice();
-    }
+    public List<OverviewDto> getNewData(String token) throws JSONException, IOException, InterruptedException {
+        ArrayList<TcsTickerDto> portfolioDtos = tcsService.getPortfolio(token);
+        String tickers = portfolioDtos.stream().map(x -> x.getTicker()).collect(Collectors.joining(" "));
 
-    public ArrayList getPortfolio(String token) throws JSONException, IOException, InterruptedException {
-        String jsonData = HttpUtil.sendTinkoffPortfolioRequest(tinkoffApiUrl + portfolioEndpoint, token);
-        JSONArray portfolio = new JSONObject(jsonData).getJSONObject("payload").getJSONArray("positions");
+        List<YahooFinancialDto> financialDtos = yahooStockService.getFinancialDtoList(tickers);
+        List<YahooStatisticsDto> statisticsDtos = yahooStockService.getStatisticsDtoList(tickers);
+        List<YahooSummaryDto> summaryDtos = yahooStockService.getSummaryDtoList(tickers);
 
-        ArrayList<PortfolioEntry> entries = new ArrayList<>();
-        double EUR_RUB = getCurrencyPairRate("EURRUB=X");
-        double USD_RUB = getCurrencyPairRate("RUB=X");
-        double USD_EUR = getCurrencyPairRate("EUR=X");
-        for (int i = 0; i < portfolio.length(); i++) {
-            JSONObject jsonObject = portfolio.getJSONObject(i);
-            entries.add(new PortfolioEntry(jsonObject, USD_RUB, EUR_RUB, USD_EUR));
-        }
-        return entries;
+        UUID uuid = UUID.randomUUID();
+        repositoryService.savePortfolioEntity(new PortfolioEntity(uuid));
+
+        portfolioDtos.stream().forEach(x -> repositoryService.saveTcsEntity(new TcsTickerEntity(uuid, x)));
+        financialDtos.stream().forEach(x -> repositoryService.saveYahooFinancialEntity(new YahooFinancialEntity(uuid, x)));
+        statisticsDtos.stream().forEach(x -> repositoryService.saveYahooStatisticsEntity(new YahooStatisticsEntity(uuid, x)));
+        summaryDtos.stream().forEach(x -> repositoryService.saveYahooSummaryEntity(new YahooSummaryEntity(uuid, x)));
+
+        return repositoryService.getOverviewDtos(uuid);
     }
 }
