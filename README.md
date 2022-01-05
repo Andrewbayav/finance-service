@@ -28,6 +28,88 @@
             "isSandboxEnabled":"true"                                    // параметр режима песочницы
         }
 
-###Описание API endpoints
+###Описание Tinkoff Open Api endpoints
 
         https://github.com/reflash/tinkoff-python-api/blob/master/README.md#documentation-for-api-endpoints
+
+### Что мы полезного можем получить от Yahoo Finance Api
+
+У Yahoo Finance API (https://query1.finance.yahoo.com/v10/finance/quoteSummary/) огромное количество модулей:
+    assetProfile
+    incomeStatementHistory
+    incomeStatementHistoryQuarterly
+    balanceSheetHistory
+    balanceSheetHistoryQuarterly
+    cashflowStatementHistory
+    cashflowStatementHistoryQuarterly
+    defaultKeyStatistics
+    financialData
+    calendarEvents
+    secFilings
+    recommendationTrend
+    upgradeDowngradeHistory
+    institutionOwnership
+    fundOwnership
+    majorDirectHolders
+    majorHoldersBreakdown
+    insiderTransactions
+    insiderHolders
+    netSharePurchaseActivity
+    earnings
+    earningsHistory
+    earningsTrend
+    industryTrend
+    indexTrend
+    sectorTrend
+   
+Пример использования: https://query1.finance.yahoo.com/v10/finance/quoteSummary/$TICKER?modules=$MODULE_NAME , 
+где вместо $MODULE_NAME подставляем нужный нам модуль, а вместо TICKER - соответственно, тикер.
+
+    https://query1.finance.yahoo.com/v10/finance/quoteSummary/BK?modules=financialData
+
+Мы испольуем ограниченное количество информации от Yahoo (параметры, которые отмечены знаком +), для собственного удобства опишу структуру JSON
+
+defaultKeyStatistics:
+    quoteSummary
+        result (Array)
+            defaultKeyStatistics
+                enterpriseValue + 
+                forwardPE +
+                priceToBook +
+                enterpriseToEbitda +
+                trailingEps       
+                forwardEps
+                enterpriseToRevenue
+                и многое другое...
+
+summaryDetail
+    quoteSummary
+        result (Array)
+            summaryDetail
+                dividendYield +
+                trailingPE +
+                forwardPE +
+                marketCap +
+                priceToSalesTrailing12Months + 
+                previousClose
+                open
+                dayLow
+                dayHigh                        
+                и многое другое...
+
+financialData
+        quoteSummary
+            result (Array)
+                financialData
+                    recommendationMean +
+                    returnOnEquity +
+                    totalCash
+                    totalCashPerShare
+                    totalDebt
+                    returnOnAssets
+                    operatingCashflow
+                    revenueGrowth
+                    и многое другое...
+                                
+            
+t.GZkWUKuay388MaOQTTnbrOPP0xgB-mSHnP8jq5Y_HtbNw5sAQlceLMgUgUz7ypiMf7l3MW414rqZTtmgRC9h4g

@@ -1,5 +1,8 @@
 package finance.service.dto;
 
+import lombok.Data;
+
+@Data
 public class YahooPriceDto {
     public String getTicker() {
         return ticker;

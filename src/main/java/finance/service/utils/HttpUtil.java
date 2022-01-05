@@ -1,9 +1,7 @@
 package finance.service.utils;
 
-import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,19 +11,24 @@ import java.net.http.HttpResponse;
 
 public class HttpUtil {
 
-    // TODO: Сделть одну утилиту отправки запросов
-
-    public static String sendYahooTickerRequest(String apiUrl, String ticker, String params) throws IOException, InterruptedException {
+    public static String sendYahooTickerRequest(String apiUrl, String ticker, String params) {
         String url = apiUrl.concat(ticker).concat(params);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build();
+        String result;
 
-        return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        try {
+            result = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        } catch (Exception e){
+            e.printStackTrace();
+            result = "";
+        }
+        return result;
     }
 
-    public static String sendTinkoffPortfolioRequest(String apiUrl, String token) throws IOException {
+    public static String sendTinkoffPortfolioRequest(String apiUrl, String token) {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
@@ -34,7 +37,14 @@ public class HttpUtil {
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
 
-        return client.newCall(request).execute().body().string();
+        String result;
+        try {
+            result = client.newCall(request).execute().body().string();
+        } catch (Exception e){
+            e.printStackTrace();
+            result = "";
+        }
+        return result;
     }
 
 }

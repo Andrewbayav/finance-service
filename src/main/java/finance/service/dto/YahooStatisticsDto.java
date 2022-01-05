@@ -3,23 +3,26 @@ package finance.service.dto;
 import lombok.Data;
 
 @Data
-public class YahooStockStatisticsDto {
+public class YahooStatisticsDto {
 
+    private String ticker;
     private double priceToBook;
-    private double forwardPE;
     private double enterpriseValue;
     private double enterpriseToEbitda;
 
-    public YahooStockStatisticsDto(double enterpriseValue, double forwardPE, double priceToBook, double enterpriseToEbitda) {
+    public YahooStatisticsDto(String ticker,
+                              double enterpriseValue,
+                              double priceToBook,
+                              double enterpriseToEbitda) {
+        this.ticker = ticker;
         this.enterpriseValue = enterpriseValue;
-        this.forwardPE = forwardPE;
         this.priceToBook = priceToBook;
         this.enterpriseToEbitda = enterpriseToEbitda;
     }
 
-    public YahooStockStatisticsDto() {
+    public YahooStatisticsDto(String ticker) {
+        this.ticker = ticker;
         this.enterpriseValue = 0.0;
-        this.forwardPE = 0.0;
         this.priceToBook = 0.0;
         this.enterpriseToEbitda = 0.0;
     }
