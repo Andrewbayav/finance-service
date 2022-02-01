@@ -30,7 +30,7 @@ public class InvestController {
     @ApiOperation("Запрос информации о портфеле пользователя")
     public List<OverviewDto> requestPortfolio(@RequestBody PortfolioRequest request) {
         try {
-            return request.getRefresh() ? stockService.getNewData(request.getToken()) : stockService.getLatestAvailableData();
+            return request.getRefresh() ? stockService.getNewData(request.getToken()) : stockService.getLatestAvailableData(request.getToken());
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();

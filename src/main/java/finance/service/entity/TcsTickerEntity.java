@@ -40,8 +40,8 @@ public class TcsTickerEntity {
     @Column(name = "currency")
     private String currency;
 
-    @Column(name = "lots")
-    private int lots;
+    @Column(name = "balance")
+    private int balance;
 
     @Column(name = "expectedYield")
     private double expectedYield;
@@ -55,7 +55,7 @@ public class TcsTickerEntity {
         this.ticker = dto.getTicker();
         this.instrumentType = dto.getInstrumentType();
         this.currency = dto.getCurrency();
-        this.lots = dto.getLots();
+        this.balance = dto.getBalance();
         this.expectedYield = dto.getExpectedYield();
         this.averagePositionPrice = dto.getAveragePositionPrice();
         log.info("New instance: " + this);

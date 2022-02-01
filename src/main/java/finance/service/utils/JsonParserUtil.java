@@ -1,7 +1,7 @@
 package finance.service.utils;
 
 import finance.service.dto.YahooFinancialDto;
-import finance.service.dto.YahooPriceDto;
+import finance.service.dto.ExchangeDto;
 import finance.service.dto.YahooStatisticsDto;
 import finance.service.dto.YahooSummaryDto;
 import lombok.extern.slf4j.Slf4j;
@@ -11,30 +11,17 @@ import org.json.JSONObject;
 @Slf4j
 public class JsonParserUtil {
 
-    public static YahooPriceDto jsonObjectToStockDto(String responseBody) {
-
-        JSONObject stockJsonInfo = null;
-        String stockTicker = "";
-        String stockName = "";
-        double stockPrice = 0.0;
-
-        // TODO: исправить логику обработки ошибок
+    public static ExchangeDto jsonObjectToExchangeDto(String responseBody, String ticker) {
         try {
-            JSONObject object = new JSONObject(responseBody);
-            JSONObject stockJsonObj = (JSONObject) object.get("quoteSummary");
-            JSONObject stockInfoArrayObj = (JSONObject) stockJsonObj.getJSONArray("result").get(0);
-            stockJsonInfo = (JSONObject) stockInfoArrayObj.get("price");
-            JSONObject jsonStockPrice = (JSONObject) stockJsonInfo.get("regularMarketPrice");
-
-            stockTicker = stockJsonInfo.getString("symbol");
-            stockName = stockJsonInfo.getString("shortName");
-            stockPrice = Double.parseDouble(jsonStockPrice.getString("raw"));
-
+            JSONObject yahooJsonObject = getYahooJsonObject(responseBody, "price");
+            String name = yahooJsonObject.getString("shortName").replaceAll("USD/","");
+            double rate = parseDoubleRaw(yahooJsonObject.getJSONObject("regularMarketPrice"));
+            return new ExchangeDto(ticker, name, rate);
         } catch (Exception e) {
             log.warn("Got exception with this response: " + responseBody);
             e.printStackTrace();
+            return new ExchangeDto(ticker);
         }
-        return new YahooPriceDto(stockTicker, stockName, stockPrice);
     }
 
     public static YahooStatisticsDto jsonToYahooStatisticsObj(String responseBody, String ticker) {

@@ -8,7 +8,7 @@ public class TcsTickerDto {
     private String ticker;
     private String instrumentType;
     private String currency;
-    private int lots;
+    private int balance;
     private double expectedYield;
     private double averagePositionPrice;
 
@@ -17,14 +17,14 @@ public class TcsTickerDto {
                         String ticker,
                         String instrumentType,
                         String currency,
-                        int lots,
+                        int balance,
                         double expectedYield,
                         double averagePositionPrice) {
         this.name = name;
         this.ticker = ticker;
         this.instrumentType = instrumentType;
         this.currency = currency;
-        this.lots = lots;
+        this.balance = balance;
         this.expectedYield = expectedYield;
         this.averagePositionPrice = averagePositionPrice;
     }

@@ -10,11 +10,13 @@ public class OverviewMapper implements RowMapper<OverviewDto> {
     @Override
     public OverviewDto mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new OverviewDto(
-                rs.getInt("lots"),
+                rs.getInt("balance"),
                 rs.getString("name"),
                 rs.getString("ticker"),
                 rs.getString("instrument_type"),
                 rs.getString("currency"),
+                rs.getString("timestamp"),
+                rs.getDouble("rate"),
                 rs.getDouble("average_position_price"),
                 rs.getDouble("expected_yield"),
                 rs.getDouble("recommendation_mean"),

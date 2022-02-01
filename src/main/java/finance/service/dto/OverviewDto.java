@@ -13,11 +13,13 @@ import java.util.UUID;
 @Slf4j
 public class OverviewDto {
 
-    int lots;
+    int balance;
     String name;
     String ticker;
     String currency;
     String instrumentType;
+    String timestamp;
+    double rate;
     double averagePositionPrice;
     double expectedYield;
     double recommendationMean;
@@ -32,11 +34,13 @@ public class OverviewDto {
     public OverviewDto() {
     }
 
-    public OverviewDto(int lots,
+    public OverviewDto(int balance,
                        String name,
                        String ticker,
                        String instrumentType,
                        String currency,
+                       String timestamp,
+                       double rate,
                        double averagePositionPrice,
                        double expectedYield,
                        double recommendationMean,
@@ -50,10 +54,12 @@ public class OverviewDto {
         this.name = name;
         this.ticker = ticker;
         this.averagePositionPrice = averagePositionPrice;
-        this.lots = lots;
+        this.balance = balance;
         this.currency = currency;
         this.expectedYield = expectedYield;
         this.instrumentType = instrumentType;
+        this.timestamp = timestamp;
+        this.rate = rate;
         this.recommendationMean = recommendationMean;
         this.returnOnEquity = returnOnEquity;
         this.priceToBook = priceToBook;

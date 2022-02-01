@@ -1,11 +1,14 @@
-CREATE or REPLACE VIEW financial_overview
-AS SELECT
-    t.id, t.uuid, t.name, t.ticker, t.average_position_price, t.lots, t.currency, t.expected_yield, t.instrument_type,
-    f.recommendation_mean, f. return_on_equity,
-    st.price_to_book, st.enterprise_value,
-    s.dividend_yield, s.trailingpe, s.price_to_sales_trailing12months, s.market_cap
-FROM
-    tcs t
-JOIN yahoo_financial f on t.ticker = f.ticker and t.uuid = f.uuid
-JOIN yahoo_statistics st on st.ticker = f.ticker and st.uuid = f.uuid
-JOIN yahoo_summary s on s.ticker = st.ticker and s.uuid = st.uuid;
+-- CREATE or REPLACE VIEW financial_overview
+-- AS SELECT
+--     t.id, t.uuid, t.name, t.ticker, t.average_position_price, t.balance, t.currency, t.expected_yield, t.instrument_type,
+--     f.recommendation_mean, f. return_on_equity,
+--     st.price_to_book, st.enterprise_value,
+--     s.dividend_yield, s.trailingpe, s.price_to_sales_trailing12months, s.market_cap,
+--     u.currency as rate,
+--     p.timestamp
+-- FROM tcs t
+-- FULL JOIN usd_exchange u on u.currency = t.currency and u.uuid = t.uuid
+-- JOIN yahoo_financial f on f.ticker = t.ticker and f.uuid = t.uuid
+-- JOIN yahoo_statistics st on st.ticker = f.ticker and st.uuid = f.uuid
+-- JOIN yahoo_summary s on st.ticker = s.ticker and st.uuid = s.uuid
+-- JOIN portfolio p on p.uuid = s.uuid;

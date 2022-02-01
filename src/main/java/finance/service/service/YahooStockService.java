@@ -1,5 +1,6 @@
 package finance.service.service;
 
+import finance.service.dto.ExchangeDto;
 import finance.service.dto.YahooFinancialDto;
 import finance.service.dto.YahooStatisticsDto;
 import finance.service.dto.YahooSummaryDto;
@@ -35,6 +36,9 @@ public class YahooStockService {
     @Value("${yahoo.params.financialData}")
     private String yahooFinancialData;
 
+    @Value("${yahoo.exchange.tickers}")
+    private String exchangeTickers;
+
     // TODO: параметризация методов?
 
     public List<YahooFinancialDto> getFinancialDtoList(String tickers) {
@@ -62,5 +66,14 @@ public class YahooStockService {
             return JsonParserUtil.jsonToYahooSummaryObj(yahooSummaryJson, ticker);
         };
         return Stream.of(tickers.trim().split(" ")).map(t -> function.apply(t)).collect(Collectors.toList());
+    }
+
+    public List<ExchangeDto> getExchangeDtoList() {
+        Function<String, ExchangeDto> function = ticker -> {
+            log.info("Send summary request for ticker: " + ticker);
+            String yahooSummaryJson = HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooPrice);
+            return JsonParserUtil.jsonObjectToExchangeDto(yahooSummaryJson, ticker);
+        };
+        return Stream.of(exchangeTickers.trim().split(" ")).map(t -> function.apply(t)).collect(Collectors.toList());
     }
 }

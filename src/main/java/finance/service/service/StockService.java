@@ -1,10 +1,12 @@
 package finance.service.service;
 
+import finance.service.dto.ExchangeDto;
 import finance.service.dto.OverviewDto;
 import finance.service.dto.TcsTickerDto;
 import finance.service.dto.YahooFinancialDto;
 import finance.service.dto.YahooStatisticsDto;
 import finance.service.dto.YahooSummaryDto;
+import finance.service.entity.ExchangeEntity;
 import finance.service.entity.PortfolioEntity;
 import finance.service.entity.TcsTickerEntity;
 import finance.service.entity.YahooFinancialEntity;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,18 +43,22 @@ public class StockService {
         this.repositoryService = repositoryService;
     }
 
-    public List<OverviewDto> getLatestAvailableData() {
+    public List<OverviewDto> getLatestAvailableData(String token) throws JSONException {
         PortfolioEntity latest = repositoryService.getLatestPortfolioEntity();
+        if (latest == null) {
+            repositoryService.prepareView();
+            return getNewData(token);
+        }
         return repositoryService.getOverviewDtos(latest.getUuid());
     }
 
-    public List<OverviewDto> getNewData(String token) throws JSONException, IOException, InterruptedException {
+    public List<OverviewDto> getNewData(String token) throws JSONException {
         ArrayList<TcsTickerDto> portfolioDtos = tcsService.getPortfolio(token);
         String tickers = portfolioDtos.stream().map(x -> x.getTicker()).collect(Collectors.joining(" "));
-
         List<YahooFinancialDto> financialDtos = yahooStockService.getFinancialDtoList(tickers);
         List<YahooStatisticsDto> statisticsDtos = yahooStockService.getStatisticsDtoList(tickers);
         List<YahooSummaryDto> summaryDtos = yahooStockService.getSummaryDtoList(tickers);
+        List<ExchangeDto> exchangeDtos = yahooStockService.getExchangeDtoList();
 
         UUID uuid = UUID.randomUUID();
         repositoryService.savePortfolioEntity(new PortfolioEntity(uuid));
@@ -59,6 +67,7 @@ public class StockService {
         financialDtos.stream().forEach(x -> repositoryService.saveYahooFinancialEntity(new YahooFinancialEntity(uuid, x)));
         statisticsDtos.stream().forEach(x -> repositoryService.saveYahooStatisticsEntity(new YahooStatisticsEntity(uuid, x)));
         summaryDtos.stream().forEach(x -> repositoryService.saveYahooSummaryEntity(new YahooSummaryEntity(uuid, x)));
+        exchangeDtos.stream().forEach(x -> repositoryService.saveExchangeEntity(new ExchangeEntity(uuid, x)));
 
         return repositoryService.getOverviewDtos(uuid);
     }
