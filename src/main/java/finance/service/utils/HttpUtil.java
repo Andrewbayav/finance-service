@@ -28,6 +28,23 @@ public class HttpUtil {
         return result;
     }
 
+    public static String getTickerByIsin(String apiUrl) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .build();
+        String result;
+
+        try {
+            result = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        } catch (Exception e){
+            e.printStackTrace();
+            result = "";
+        }
+        return result;
+    }
+
+
     public static String sendTinkoffPortfolioRequest(String apiUrl, String token) {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();

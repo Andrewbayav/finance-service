@@ -3,6 +3,7 @@ package finance.service.api.controller;
 import finance.service.api.controller.request.PortfolioRequest;
 import finance.service.dto.OverviewDto;
 import finance.service.service.StockService;
+import finance.service.service.TickerDictionaryService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,12 @@ import java.util.List;
 public class InvestController {
 
     private final StockService stockService;
+    private final TickerDictionaryService dictionaryService;
 
-    public InvestController(@Autowired StockService stockService) {
+    @Autowired
+    public InvestController(StockService stockService, TickerDictionaryService dictionaryService) {
         this.stockService = stockService;
+        this.dictionaryService = dictionaryService;
     }
 
     // TODO: добавить ControllerAdvice
@@ -36,4 +40,21 @@ public class InvestController {
             return new ArrayList<>();
         }
     }
+
+    // TODO: определиться, будем как то обновлять базу тикеров по ISIN?
+    // Yahoo ограничивает кол-во запросов - 2000 в час с одного IP.
+    @PostMapping("/stocks-dictionary")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation("Для получения справочника тикеров по ISIN")
+    public List<OverviewDto> dictionary(@RequestBody PortfolioRequest request) {
+        try {
+            dictionaryService.getMarketStocks(request.getToken());
+            return new ArrayList<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+
 }

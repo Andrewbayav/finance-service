@@ -17,7 +17,6 @@ import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,15 +31,18 @@ public class StockService {
     private final TcsService tcsService;
     private final YahooStockService yahooStockService;
     private final RepositoryService repositoryService;
+    private final TickerDictionaryService dictionaryService;
 
     @Autowired
     public StockService(
             TcsService tcsService,
             YahooStockService yahooStockService,
-            RepositoryService repositoryService) {
+            RepositoryService repositoryService,
+            TickerDictionaryService dictionaryService) {
         this.tcsService = tcsService;
         this.yahooStockService = yahooStockService;
         this.repositoryService = repositoryService;
+        this.dictionaryService = dictionaryService;
     }
 
     public List<OverviewDto> getLatestAvailableData(String token) throws JSONException {
@@ -52,9 +54,17 @@ public class StockService {
         return repositoryService.getOverviewDtos(latest.getUuid());
     }
 
+    // TODO: Рефакторим
     public List<OverviewDto> getNewData(String token) throws JSONException {
         ArrayList<TcsTickerDto> portfolioDtos = tcsService.getPortfolio(token);
-        String tickers = portfolioDtos.stream().map(x -> x.getTicker()).collect(Collectors.joining(" "));
+        Function<TcsTickerDto, String> checkDictionary = x -> {
+            String ticker = x.getTicker();
+            String yahooTicker = dictionaryService.getTickerFromDictionary(ticker);
+            if (!yahooTicker.equals(ticker)) x.setTicker(yahooTicker);
+            return x.getTicker();
+        };
+        String tickers = portfolioDtos.stream().map(x -> checkDictionary.apply(x)).collect(Collectors.joining(" "));
+
         List<YahooFinancialDto> financialDtos = yahooStockService.getFinancialDtoList(tickers);
         List<YahooStatisticsDto> statisticsDtos = yahooStockService.getStatisticsDtoList(tickers);
         List<YahooSummaryDto> summaryDtos = yahooStockService.getSummaryDtoList(tickers);
