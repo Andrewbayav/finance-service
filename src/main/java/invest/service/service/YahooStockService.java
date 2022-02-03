@@ -1,10 +1,12 @@
 package invest.service.service;
 
-import invest.service.dto.ExchangeDto;
-import invest.service.dto.QuickAnalysisDto;
-import invest.service.dto.YahooFinancialDto;
-import invest.service.dto.YahooStatisticsDto;
-import invest.service.dto.YahooSummaryDto;
+import invest.service.dto.yahoo.ExchangeDto;
+import invest.service.dto.representation.QuickAnalysisDto;
+import invest.service.dto.yahoo.YahooFinancialDto;
+import invest.service.dto.yahoo.YahooStatisticsDto;
+import invest.service.dto.yahoo.YahooSummaryDto;
+import invest.service.entity.AnalysisProcessingEntity;
+import invest.service.entity.QuickAnalysisEntity;
 import invest.service.utils.HttpUtil;
 import invest.service.utils.JsonParserUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import  java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,7 +44,7 @@ public class YahooStockService {
     @Value("${yahoo.exchange.tickers}")
     private String exchangeTickers;
 
-    // TODO: параметризация методов?
+    private final RepositoryService repositoryService;
 
     public List<YahooFinancialDto> getFinancialDtoList(String tickers) {
         Function<String, YahooFinancialDto> function = ticker -> {
@@ -82,24 +85,36 @@ public class YahooStockService {
     public List<QuickAnalysisDto> getQuickAnalysis(String tickers) {
         List<QuickAnalysisDto> list = new ArrayList<>();
         for (String ticker : tickers.split(" ")) {
-
-            log.info("Making analysis for: " + ticker);
-            YahooFinancialDto financialDto = JsonParserUtil.jsonToYahooFinancialObj(HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooFinancialData), ticker);
-            YahooStatisticsDto statisticsDto = JsonParserUtil.jsonToYahooStatisticsObj(HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooStatistics), ticker);
-            YahooSummaryDto summaryDto = JsonParserUtil.jsonToYahooSummaryObj(HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooSummaryDetail), ticker);
-            list.add(new QuickAnalysisDto(
-                            ticker,
-                            financialDto.getRecommendationMean(),
-                            financialDto.getReturnOnEquity(),
-                            statisticsDto.getPriceToBook(),
-                            statisticsDto.getEnterpriseValue(),
-                            summaryDto.getDividendYield(),
-                            summaryDto.getTrailingPE(),
-                            summaryDto.getPriceToSalesTrailing12Months(),
-                            summaryDto.getMarketCap()
-                    )
-            );
+            list.add(getQuickAnalysisDto(ticker));
         }
         return list;
+    }
+
+    public void getFullMarketAnalysis(String tickers) {
+        List<QuickAnalysisDto> list = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+        this.repositoryService.saveAnalysisProcessingEntity(new AnalysisProcessingEntity(uuid));
+        for (String ticker : tickers.split(" ")) {
+            QuickAnalysisDto dto = getQuickAnalysisDto(ticker);
+            repositoryService.saveQuickAnalysisEntity(new QuickAnalysisEntity(dto, uuid));
+        }
+    }
+
+    public QuickAnalysisDto getQuickAnalysisDto(String ticker) {
+        log.info("Making quick analysis for: " + ticker);
+        YahooFinancialDto financialDto = JsonParserUtil.jsonToYahooFinancialObj(HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooFinancialData), ticker);
+        YahooStatisticsDto statisticsDto = JsonParserUtil.jsonToYahooStatisticsObj(HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooStatistics), ticker);
+        YahooSummaryDto summaryDto = JsonParserUtil.jsonToYahooSummaryObj(HttpUtil.sendYahooTickerRequest(yahooApiUrl, ticker, yahooSummaryDetail), ticker);
+        return new QuickAnalysisDto(
+                        ticker,
+                        financialDto.getRecommendationMean(),
+                        financialDto.getReturnOnEquity(),
+                        statisticsDto.getPriceToBook(),
+                        statisticsDto.getEnterpriseValue(),
+                        summaryDto.getDividendYield(),
+                        summaryDto.getTrailingPE(),
+                        summaryDto.getPriceToSalesTrailing12Months(),
+                        summaryDto.getMarketCap()
+                );
     }
 }

@@ -1,6 +1,6 @@
-package invest.service.entity;
+package invest.service.entity.yahoo;
 
-import invest.service.dto.YahooSummaryDto;
+import invest.service.dto.yahoo.YahooSummaryDto;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;

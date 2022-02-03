@@ -1,4 +1,4 @@
-package invest.service.dto;
+package invest.service.dto.yahoo;
 
 import lombok.Data;
 

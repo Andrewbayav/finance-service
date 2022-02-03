@@ -1,6 +1,6 @@
 package invest.service.jdbcMapper;
 
-import invest.service.dto.OverviewDto;
+import invest.service.dto.representation.OverviewDto;
 import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;

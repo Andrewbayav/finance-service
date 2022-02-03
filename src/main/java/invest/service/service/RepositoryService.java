@@ -1,19 +1,25 @@
 package invest.service.service;
 
-import invest.service.dto.OverviewDto;
-import invest.service.entity.ExchangeEntity;
+import invest.service.dto.representation.OverviewDto;
+import invest.service.entity.AnalysisProcessingEntity;
+import invest.service.entity.QuickAnalysisEntity;
+import invest.service.entity.yahoo.ExchangeEntity;
 import invest.service.entity.PortfolioEntity;
 import invest.service.entity.TcsTickerEntity;
-import invest.service.entity.YahooFinancialEntity;
-import invest.service.entity.YahooStatisticsEntity;
-import invest.service.entity.YahooSummaryEntity;
+import invest.service.entity.TickerDictionaryEntity;
+import invest.service.entity.yahoo.YahooFinancialEntity;
+import invest.service.entity.yahoo.YahooStatisticsEntity;
+import invest.service.entity.yahoo.YahooSummaryEntity;
 import invest.service.jdbcMapper.OverviewMapper;
-import invest.service.repository.ExchangeRepository;
+import invest.service.repository.AnalysisProcessingRepository;
+import invest.service.repository.QuickAnalysisRepository;
+import invest.service.repository.yahoo.ExchangeRepository;
 import invest.service.repository.PortfolioRepository;
 import invest.service.repository.TcsRepository;
-import invest.service.repository.YahooFinancialRepository;
-import invest.service.repository.YahooStatisticsRepository;
-import invest.service.repository.YahooSummaryRepository;
+import invest.service.repository.TickerDictionaryRepository;
+import invest.service.repository.yahoo.YahooFinancialRepository;
+import invest.service.repository.yahoo.YahooStatisticsRepository;
+import invest.service.repository.yahoo.YahooSummaryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,6 +29,7 @@ import java.util.List;
 
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,6 +42,9 @@ public class RepositoryService {
     private final YahooStatisticsRepository yahooStatisticsRepository;
     private final ExchangeRepository exchangeRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final TickerDictionaryRepository dictionaryRepository;
+    private final QuickAnalysisRepository quickAnalysisRepository;
+    private final AnalysisProcessingRepository analysisProcessingRepository;
 
     @Autowired
     public RepositoryService(
@@ -44,7 +54,10 @@ public class RepositoryService {
             YahooSummaryRepository yahooSummaryRepository,
             YahooStatisticsRepository yahooStatisticsRepository,
             ExchangeRepository exchangeRepository,
-            JdbcTemplate jdbcTemplate) {
+            JdbcTemplate jdbcTemplate,
+            TickerDictionaryRepository dictionaryRepository,
+            QuickAnalysisRepository quickAnalysisRepository,
+            AnalysisProcessingRepository analysisProcessingRepository) {
         this.portfolioRepository = portfolioRepository;
         this.tcsRepository = tcsRepository;
         this.yahooFinancialRepository = yahooFinancialRepository;
@@ -52,6 +65,9 @@ public class RepositoryService {
         this.yahooStatisticsRepository = yahooStatisticsRepository;
         this.exchangeRepository = exchangeRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.dictionaryRepository = dictionaryRepository;
+        this.quickAnalysisRepository = quickAnalysisRepository;
+        this.analysisProcessingRepository = analysisProcessingRepository;
     }
 
     public void saveTcsEntity(TcsTickerEntity entity) {
@@ -66,10 +82,6 @@ public class RepositoryService {
         this.exchangeRepository.save(entity);
     }
 
-    public PortfolioEntity getLatestPortfolioEntity () {
-        return portfolioRepository.findFirstByOrderByTimestampDesc();
-    }
-
     public void saveYahooFinancialEntity(YahooFinancialEntity entity) {
         this.yahooFinancialRepository.save(entity);
     }
@@ -80,6 +92,26 @@ public class RepositoryService {
 
     public void saveYahooSummaryEntity(YahooSummaryEntity entity) {
         this.yahooSummaryRepository.save(entity);
+    }
+
+    public void saveQuickAnalysisEntity(QuickAnalysisEntity entity) {
+        this.quickAnalysisRepository.save(entity);
+    }
+
+    public void saveAnalysisProcessingEntity(AnalysisProcessingEntity entity) {
+        this.analysisProcessingRepository.save(entity);
+    }
+
+    public PortfolioEntity getLatestPortfolioEntity () {
+        return portfolioRepository.findFirstByOrderByTimestampDesc();
+    }
+
+    public String getTickerFromDictionary(String tcsTicker) {
+        return dictionaryRepository.findByTcsTicker(tcsTicker).getYahooTicker();
+    }
+
+    public List<String> getAllTickersFromDictionary() {
+        return dictionaryRepository.findAll().stream().map(x -> x.getYahooTicker()).collect(Collectors.toList());
     }
 
     public List<OverviewDto> getOverviewDtos (UUID uuid) {
@@ -111,6 +143,12 @@ public class RepositoryService {
                 "JOIN yahoo_summary s on st.ticker = s.ticker and st.uuid = s.uuid\n" +
                 "JOIN portfolio p on p.uuid = s.uuid;\n";
         jdbcTemplate.execute(query);
+    }
+
+
+    // TODO: заплатка для сохранения тикеров в справочник - на этом этапе не интегрируем
+    public void saveTickersToDictionary(List<TickerDictionaryEntity> entities) {
+        this.dictionaryRepository.saveAll(entities);
     }
 
 }

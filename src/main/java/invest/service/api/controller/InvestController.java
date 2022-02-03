@@ -1,10 +1,9 @@
 package invest.service.api.controller;
 
 import invest.service.api.controller.request.PortfolioRequest;
-import invest.service.dto.OverviewDto;
-import invest.service.dto.QuickAnalysisDto;
+import invest.service.dto.representation.OverviewDto;
+import invest.service.dto.representation.QuickAnalysisDto;
 import invest.service.service.StockService;
-import invest.service.service.TickerDictionaryService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,10 @@ import java.util.List;
 public class InvestController {
 
     private final StockService stockService;
-    private final TickerDictionaryService dictionaryService;
 
     @Autowired
-    public InvestController(StockService stockService, TickerDictionaryService dictionaryService) {
+    public InvestController(StockService stockService) {
         this.stockService = stockService;
-        this.dictionaryService = dictionaryService;
     }
 
     // TODO: добавить ControllerAdvice
@@ -54,6 +51,18 @@ public class InvestController {
         }
     }
 
+    @GetMapping("/all-stocks-analyzer")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation("Выгружаем информацио о всем рынке акций")
+    public void allMarketInfo() {
+        try {
+            stockService.getAllMarketStocksInfo();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     // TODO: определиться, будем как то обновлять базу тикеров по ISIN?
     // Yahoo ограничивает кол-во запросов - 2000 в час с одного IP.
@@ -62,7 +71,7 @@ public class InvestController {
     @ApiOperation("Для получения справочника тикеров по ISIN")
     public List<OverviewDto> dictionary(@RequestBody PortfolioRequest request) {
         try {
-            dictionaryService.getMarketStocks(request.getToken());
+            stockService.getMarketStocks(request.getToken());
             return new ArrayList<>();
         } catch (Exception e) {
             e.printStackTrace();

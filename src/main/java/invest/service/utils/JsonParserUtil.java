@@ -1,9 +1,9 @@
 package invest.service.utils;
 
-import invest.service.dto.YahooFinancialDto;
-import invest.service.dto.ExchangeDto;
-import invest.service.dto.YahooStatisticsDto;
-import invest.service.dto.YahooSummaryDto;
+import invest.service.dto.yahoo.YahooFinancialDto;
+import invest.service.dto.yahoo.ExchangeDto;
+import invest.service.dto.yahoo.YahooStatisticsDto;
+import invest.service.dto.yahoo.YahooSummaryDto;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;

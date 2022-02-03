@@ -1,6 +1,7 @@
-package invest.service.entity;
+package invest.service.entity.yahoo;
 
-import invest.service.dto.YahooFinancialDto;
+
+import invest.service.dto.yahoo.YahooStatisticsDto;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,8 +19,8 @@ import java.util.UUID;
 @Entity
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "yahoo_financial")
-public class YahooFinancialEntity {
+@Table(name = "yahoo_statistics")
+public class YahooStatisticsEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,19 +32,22 @@ public class YahooFinancialEntity {
     @Column(name = "ticker")
     private String ticker;
 
-    @Column(name = "recommendationMean")
-    private double recommendationMean;
+    @Column(name = "priceToBook")
+    private double priceToBook;
 
-    @Column(name = "returnOnEquity")
-    private double returnOnEquity;
+    @Column(name = "enterpriseValue")
+    private double enterpriseValue;
 
-    public YahooFinancialEntity(UUID uuid, YahooFinancialDto dto) {
+    @Column(name = "enterpriseToEbitda")
+    private double enterpriseToEbitda;
+
+    public YahooStatisticsEntity(UUID uuid, YahooStatisticsDto dto) {
         this.uuid = uuid;
         this.ticker = dto.getTicker();
-        this.recommendationMean = dto.getRecommendationMean();
-        this.returnOnEquity = dto.getReturnOnEquity();
-        log.info("New YahooFinancialEntity instance: " + this);
+        this.priceToBook = dto.getPriceToBook();
+        this.enterpriseValue = dto.getEnterpriseValue();
+        this.enterpriseToEbitda = dto.getEnterpriseToEbitda();
+        log.info("New YahooStatisticsEntity instance: " + this);
     }
-
 
 }

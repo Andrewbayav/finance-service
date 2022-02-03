@@ -1,6 +1,6 @@
-package invest.service.repository;
+package invest.service.repository.yahoo;
 
-import invest.service.entity.YahooSummaryEntity;
+import invest.service.entity.yahoo.YahooSummaryEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

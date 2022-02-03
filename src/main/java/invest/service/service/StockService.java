@@ -1,23 +1,26 @@
 package invest.service.service;
 
-import invest.service.dto.ExchangeDto;
-import invest.service.dto.OverviewDto;
-import invest.service.dto.QuickAnalysisDto;
+import invest.service.dto.yahoo.ExchangeDto;
+import invest.service.dto.representation.OverviewDto;
+import invest.service.dto.representation.QuickAnalysisDto;
 import invest.service.dto.TcsTickerDto;
-import invest.service.dto.YahooFinancialDto;
-import invest.service.dto.YahooStatisticsDto;
-import invest.service.dto.YahooSummaryDto;
-import invest.service.entity.ExchangeEntity;
+import invest.service.dto.yahoo.YahooFinancialDto;
+import invest.service.dto.yahoo.YahooStatisticsDto;
+import invest.service.dto.yahoo.YahooSummaryDto;
+import invest.service.entity.QuickAnalysisEntity;
+import invest.service.entity.yahoo.ExchangeEntity;
 import invest.service.entity.PortfolioEntity;
 import invest.service.entity.TcsTickerEntity;
-import invest.service.entity.YahooFinancialEntity;
-import invest.service.entity.YahooStatisticsEntity;
-import invest.service.entity.YahooSummaryEntity;
+import invest.service.entity.TickerDictionaryEntity;
+import invest.service.entity.yahoo.YahooFinancialEntity;
+import invest.service.entity.yahoo.YahooStatisticsEntity;
+import invest.service.entity.yahoo.YahooSummaryEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,18 +35,15 @@ public class StockService {
     private final TcsService tcsService;
     private final YahooStockService yahooStockService;
     private final RepositoryService repositoryService;
-    private final TickerDictionaryService dictionaryService;
 
     @Autowired
     public StockService(
             TcsService tcsService,
             YahooStockService yahooStockService,
-            RepositoryService repositoryService,
-            TickerDictionaryService dictionaryService) {
+            RepositoryService repositoryService) {
         this.tcsService = tcsService;
         this.yahooStockService = yahooStockService;
         this.repositoryService = repositoryService;
-        this.dictionaryService = dictionaryService;
     }
 
     public List<OverviewDto> getLatestAvailableData(String token) throws JSONException {
@@ -60,7 +60,7 @@ public class StockService {
         ArrayList<TcsTickerDto> portfolioDtos = tcsService.getPortfolio(token);
         Function<TcsTickerDto, String> checkDictionary = x -> {
             String ticker = x.getTicker();
-            String yahooTicker = dictionaryService.getTickerFromDictionary(ticker);
+            String yahooTicker = repositoryService.getTickerFromDictionary(ticker);
             if (!yahooTicker.equals(ticker)) x.setTicker(yahooTicker);
             return x.getTicker();
         };
@@ -84,8 +84,20 @@ public class StockService {
     }
 
     public List<QuickAnalysisDto> getQuickAnalysis(String tickers) {
-        tickers = Stream.of(tickers.split(" ")).map(x -> dictionaryService.getTickerFromDictionary(x)).collect(Collectors.joining(" "));
+        tickers = Stream.of(tickers.split(" ")).map(x -> repositoryService.getTickerFromDictionary(x)).collect(Collectors.joining(" "));
         return yahooStockService.getQuickAnalysis(tickers);
     }
 
+
+    // TODO требует интеграцию с kafka
+    public void getAllMarketStocksInfo() {
+        List<String> list = repositoryService.getAllTickersFromDictionary();
+        String tickers = list.stream().collect(Collectors.joining(" "));
+        yahooStockService.getFullMarketAnalysis(tickers);
+    }
+
+    // TODO: обновление справочника тикеров - на этом этапе не интергрируем.
+    public void getMarketStocks(String token) throws InterruptedException, IOException, JSONException {
+        List<TickerDictionaryEntity> list = tcsService.getMarketStocks(token);
+    }
 }
