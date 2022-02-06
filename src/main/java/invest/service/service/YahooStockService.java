@@ -9,6 +9,7 @@ import invest.service.entity.AnalysisProcessingEntity;
 import invest.service.entity.QuickAnalysisEntity;
 import invest.service.utils.HttpUtil;
 import invest.service.utils.JsonParserUtil;
+import invest.service.websocket.kafka.KafkaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,8 @@ public class YahooStockService {
     private String exchangeTickers;
 
     private final RepositoryService repositoryService;
+    private final KafkaService kafkaService;
+
 
     public List<YahooFinancialDto> getFinancialDtoList(String tickers) {
         Function<String, YahooFinancialDto> function = ticker -> {
@@ -90,12 +93,14 @@ public class YahooStockService {
         return list;
     }
 
-    public void getFullMarketAnalysis(String tickers) {
+    public void getFullMarketAnalysis(String tickers) throws InterruptedException {
         List<QuickAnalysisDto> list = new ArrayList<>();
         UUID uuid = UUID.randomUUID();
         this.repositoryService.saveAnalysisProcessingEntity(new AnalysisProcessingEntity(uuid));
         for (String ticker : tickers.split(" ")) {
+            Thread.sleep(2000);
             QuickAnalysisDto dto = getQuickAnalysisDto(ticker);
+            kafkaService.sendToKafka(dto);
             repositoryService.saveQuickAnalysisEntity(new QuickAnalysisEntity(dto, uuid));
         }
     }

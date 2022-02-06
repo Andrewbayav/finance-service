@@ -88,9 +88,7 @@ public class StockService {
         return yahooStockService.getQuickAnalysis(tickers);
     }
 
-
-    // TODO требует интеграцию с kafka
-    public void getAllMarketStocksInfo() {
+    public void getAllMarketStocksInfo() throws InterruptedException {
         List<String> list = repositoryService.getAllTickersFromDictionary();
         String tickers = list.stream().collect(Collectors.joining(" "));
         yahooStockService.getFullMarketAnalysis(tickers);

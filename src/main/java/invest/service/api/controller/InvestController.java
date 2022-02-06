@@ -54,22 +54,24 @@ public class InvestController {
     @GetMapping("/all-stocks-analyzer")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Выгружаем информацио о всем рынке акций")
-    public void allMarketInfo() {
+    public HttpStatus allMarketInfo() {
         try {
             stockService.getAllMarketStocksInfo();
+            return HttpStatus.OK;
         } catch (Exception e) {
             e.printStackTrace();
+            return HttpStatus.INTERNAL_SERVER_ERROR;
         }
     }
 
 
 
-    // TODO: определиться, будем как то обновлять базу тикеров по ISIN?
-    // Yahoo ограничивает кол-во запросов - 2000 в час с одного IP.
     @PostMapping("/stocks-dictionary")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Для получения справочника тикеров по ISIN")
     public List<OverviewDto> dictionary(@RequestBody PortfolioRequest request) {
+        // TODO: определиться, будем как то обновлять базу тикеров по ISIN?
+        // Yahoo ограничивает кол-во запросов - 2000 в час с одного IP.
         try {
             stockService.getMarketStocks(request.getToken());
             return new ArrayList<>();
@@ -77,5 +79,17 @@ public class InvestController {
             e.printStackTrace();
             return new ArrayList<>();
         }
+        //    @Autowired
+//    KafkaTemplate<String, String> kafkaTemplate;
+//
+//    static final String TOPIC = "gfg";
+//
+//    // Implementing a GET method
+//    @GetMapping("/publish")
+//    public String publish_message()
+//    {
+//        kafkaTemplate.send(TOPIC, "message");
+//        return "Message Published on Kafka !";
+//    }
     }
 }
