@@ -1,6 +1,6 @@
 package invest.service.entity;
 
-import invest.service.dto.representation.QuickAnalysisDto;
+import invest.service.dto.representation.AnalysisDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,18 +8,21 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
 @Data
 @NoArgsConstructor
-public class QuickAnalysisEntity {
+@Table(name = "market_analytics")
+public class AnalysisEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
     UUID uuid;
     String ticker;
+    String name;
     double recommendationMean;
     double returnOnEquity;
     double priceToBook;
@@ -29,9 +32,10 @@ public class QuickAnalysisEntity {
     double priceToSalesTrailing12Months;
     double marketCap;
 
-    public QuickAnalysisEntity(QuickAnalysisDto dto, UUID uuid) {
+    public AnalysisEntity(AnalysisDto dto, UUID uuid) {
         this.uuid = uuid;
         this.ticker = dto.getTicker();
+        this.name = dto.getName();
         this.recommendationMean = dto.getRecommendationMean();
         this.returnOnEquity = dto.getReturnOnEquity();
         this.priceToBook = dto.getPriceToBook();

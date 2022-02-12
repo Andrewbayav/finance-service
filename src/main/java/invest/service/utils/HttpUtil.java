@@ -11,9 +11,11 @@ import java.net.http.HttpResponse;
 
 public class HttpUtil {
 
+    // TODO: Сделать рефакторинг
+    private final static HttpClient client = HttpClient.newHttpClient();
+
     public static String sendYahooTickerRequest(String apiUrl, String ticker, String params) {
         String url = apiUrl.concat(ticker).concat(params);
-        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build();
@@ -29,7 +31,6 @@ public class HttpUtil {
     }
 
     public static String getTickerByIsin(String apiUrl) {
-        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(apiUrl))
                 .build();

@@ -2,7 +2,7 @@ package invest.service.service;
 
 import invest.service.dto.representation.OverviewDto;
 import invest.service.entity.AnalysisProcessingEntity;
-import invest.service.entity.QuickAnalysisEntity;
+import invest.service.entity.AnalysisEntity;
 import invest.service.entity.yahoo.ExchangeEntity;
 import invest.service.entity.PortfolioEntity;
 import invest.service.entity.TcsTickerEntity;
@@ -12,7 +12,7 @@ import invest.service.entity.yahoo.YahooStatisticsEntity;
 import invest.service.entity.yahoo.YahooSummaryEntity;
 import invest.service.jdbcMapper.OverviewMapper;
 import invest.service.repository.AnalysisProcessingRepository;
-import invest.service.repository.QuickAnalysisRepository;
+import invest.service.repository.AnalysisRepository;
 import invest.service.repository.yahoo.ExchangeRepository;
 import invest.service.repository.PortfolioRepository;
 import invest.service.repository.TcsRepository;
@@ -25,11 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 
 
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,7 +44,7 @@ public class RepositoryService {
     private final ExchangeRepository exchangeRepository;
     private final JdbcTemplate jdbcTemplate;
     private final TickerDictionaryRepository dictionaryRepository;
-    private final QuickAnalysisRepository quickAnalysisRepository;
+    private final AnalysisRepository analysisRepository;
     private final AnalysisProcessingRepository analysisProcessingRepository;
 
     @Autowired
@@ -56,7 +57,7 @@ public class RepositoryService {
             ExchangeRepository exchangeRepository,
             JdbcTemplate jdbcTemplate,
             TickerDictionaryRepository dictionaryRepository,
-            QuickAnalysisRepository quickAnalysisRepository,
+            AnalysisRepository analysisRepository,
             AnalysisProcessingRepository analysisProcessingRepository) {
         this.portfolioRepository = portfolioRepository;
         this.tcsRepository = tcsRepository;
@@ -66,7 +67,7 @@ public class RepositoryService {
         this.exchangeRepository = exchangeRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.dictionaryRepository = dictionaryRepository;
-        this.quickAnalysisRepository = quickAnalysisRepository;
+        this.analysisRepository = analysisRepository;
         this.analysisProcessingRepository = analysisProcessingRepository;
     }
 
@@ -94,8 +95,12 @@ public class RepositoryService {
         this.yahooSummaryRepository.save(entity);
     }
 
-    public void saveQuickAnalysisEntity(QuickAnalysisEntity entity) {
-        this.quickAnalysisRepository.save(entity);
+    public void saveAnalysisEntity(AnalysisEntity entity) {
+        this.analysisRepository.save(entity);
+    }
+
+    public List<AnalysisEntity> getAllAnalysisEntities() {
+        return this.analysisRepository.findAll();
     }
 
     public void saveAnalysisProcessingEntity(AnalysisProcessingEntity entity) {
@@ -106,12 +111,14 @@ public class RepositoryService {
         return portfolioRepository.findFirstByOrderByTimestampDesc();
     }
 
-    public String getTickerFromDictionary(String tcsTicker) {
-        return dictionaryRepository.findByTcsTicker(tcsTicker).getYahooTicker();
+    public TickerDictionaryEntity getTickerFromDictionary(String tcsTicker) {
+        return dictionaryRepository.findByTcsTicker(tcsTicker);
     }
 
-    public List<String> getAllTickersFromDictionary() {
-        return dictionaryRepository.findAll().stream().map(x -> x.getYahooTicker()).collect(Collectors.toList());
+    public Map<String, String> getAllTickersFromDictionary() {
+        Map<String, String> map = new HashMap<>();
+        dictionaryRepository.findAll().stream().forEach(x -> map.put(x.getYahooTicker(), x.getName()));
+        return map;
     }
 
     public List<OverviewDto> getOverviewDtos (UUID uuid) {

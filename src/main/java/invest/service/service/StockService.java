@@ -2,12 +2,11 @@ package invest.service.service;
 
 import invest.service.dto.yahoo.ExchangeDto;
 import invest.service.dto.representation.OverviewDto;
-import invest.service.dto.representation.QuickAnalysisDto;
+import invest.service.dto.representation.AnalysisDto;
 import invest.service.dto.TcsTickerDto;
 import invest.service.dto.yahoo.YahooFinancialDto;
 import invest.service.dto.yahoo.YahooStatisticsDto;
 import invest.service.dto.yahoo.YahooSummaryDto;
-import invest.service.entity.QuickAnalysisEntity;
 import invest.service.entity.yahoo.ExchangeEntity;
 import invest.service.entity.PortfolioEntity;
 import invest.service.entity.TcsTickerEntity;
@@ -20,10 +19,12 @@ import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,7 +61,7 @@ public class StockService {
         ArrayList<TcsTickerDto> portfolioDtos = tcsService.getPortfolio(token);
         Function<TcsTickerDto, String> checkDictionary = x -> {
             String ticker = x.getTicker();
-            String yahooTicker = repositoryService.getTickerFromDictionary(ticker);
+            String yahooTicker = repositoryService.getTickerFromDictionary(ticker).getYahooTicker();
             if (!yahooTicker.equals(ticker)) x.setTicker(yahooTicker);
             return x.getTicker();
         };
@@ -83,19 +84,18 @@ public class StockService {
         return repositoryService.getOverviewDtos(uuid);
     }
 
-    public List<QuickAnalysisDto> getQuickAnalysis(String tickers) {
-        tickers = Stream.of(tickers.split(" ")).map(x -> repositoryService.getTickerFromDictionary(x)).collect(Collectors.joining(" "));
-        return yahooStockService.getQuickAnalysis(tickers);
+    public List<AnalysisDto> getQuickAnalysis(String tickers) {
+        Map<String, String> map = new HashMap<>();
+        Consumer<String> consumer = x -> {
+            TickerDictionaryEntity entity = repositoryService.getTickerFromDictionary(x);
+            if (entity != null) map.put(entity.getYahooTicker(), entity.getName());
+        };
+        Stream.of(tickers.split(" ")).forEach(x -> consumer.accept(x));
+        return yahooStockService.getQuickAnalysis(map);
     }
 
-    public void getAllMarketStocksInfo() throws InterruptedException {
-        List<String> list = repositoryService.getAllTickersFromDictionary();
-        String tickers = list.stream().collect(Collectors.joining(" "));
-        yahooStockService.getFullMarketAnalysis(tickers);
-    }
-
-    // TODO: обновление справочника тикеров - на этом этапе не интергрируем.
-    public void getMarketStocks(String token) throws InterruptedException, IOException, JSONException {
-        List<TickerDictionaryEntity> list = tcsService.getMarketStocks(token);
-    }
+//    public void getAllMarketStocks(double rec) throws InterruptedException {
+//        Map<String, String> map = repositoryService.getAllTickersFromDictionary();
+//        yahooStockService.getFullMarketAnalysis(map, rec);
+//    }
 }

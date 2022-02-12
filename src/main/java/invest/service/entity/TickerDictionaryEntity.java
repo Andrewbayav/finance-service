@@ -23,13 +23,17 @@ public class TickerDictionaryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column (name = "name")
+    private String name;
+
     @Column(name = "tcs_ticker")
     private String tcsTicker;
 
     @Column(name = "yahoo_ticker")
     private String yahooTicker;
 
-    public TickerDictionaryEntity(String tcsTicker, String yahooTicker) {
+    public TickerDictionaryEntity(String name, String tcsTicker, String yahooTicker) {
+        this.name = name;
         this.tcsTicker = tcsTicker;
         this.yahooTicker = yahooTicker;
     }
