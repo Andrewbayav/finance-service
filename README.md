@@ -1,114 +1,46 @@
-Программа для работы с Tinkoff OpenApi
+Истркуция по запуску:
 
-###Запуск приложения:
+1. Копируем репозирории себе:
 
-1. В командной строке перейти в папку проекта и выполнить команду docker-compose up для запуска
-   и автоподготовки базы данных:
+    git@github.com:bay-av/tinkoff-invest-service-web-app.git
+    git@github.com:bay-av/tinkoff-invest-service.git
 
-        cd ${project.basedir}/compose/
-        docker-compose up
-        
-2. В командной строке, находясь в корневой папке проекта выполнить команду на запуск Spring Boot
-    приложения:
+2. Вставляем token для Tinkoff OpenApi в файле {tinkoff-invest-service-web-app_base_dir}/src/environment/environment.ts
+
+3. Запускаем docker-compose окружение: Postgres, Kafka, Zookeeper:
+
+    cd  {tinkoff-invest-service_base_dir}/compose
+    docker-compose up
     
-        mvn spring-boot:run
-        
-
-###Работа
-Для получения информации о инвестиционном инструменте посылаем GET запрос на 
-
-        localhost:8080/api/tinkoff-api
+4. Запускаем Spring-boot backend app:
     
-с body в формате JSON со следующими параметрами:
+    cd  {tinkoff-invest-service_base_dir}
+    mvn spring-boot:run
+        
+3. Запускаем angular-клиент
 
-        {
-            "token":"dsadwadsad.weqdsa3.213213.ewqd1223.ewqdssa",        // пример токена
-            "ticker":"AAPL",                                             // тикер   
-            "interval":"1min",                                           // интервал подписки на свечи              
-            "isSandboxEnabled":"true"                                    // параметр режима песочницы
-        }
+    ng serve
+    
+4. Открываем страницу клиента на http://localhost:4200. 
 
-###Описание Tinkoff Open Api endpoints
-
-        https://github.com/reflash/tinkoff-python-api/blob/master/README.md#documentation-for-api-endpoints
-
-### Что мы полезного можем получить от Yahoo Finance Api
-
-У Yahoo Finance API (https://query1.finance.yahoo.com/v10/finance/quoteSummary/) огромное количество модулей:
-    assetProfile
-    incomeStatementHistory
-    incomeStatementHistoryQuarterly
-    balanceSheetHistory
-    balanceSheetHistoryQuarterly
-    cashflowStatementHistory
-    cashflowStatementHistoryQuarterly
-    defaultKeyStatistics
-    financialData
-    calendarEvents
-    secFilings
-    recommendationTrend
-    upgradeDowngradeHistory
-    institutionOwnership
-    fundOwnership
-    majorDirectHolders
-    majorHoldersBreakdown
-    insiderTransactions
-    insiderHolders
-    netSharePurchaseActivity
-    earnings
-    earningsHistory
-    earningsTrend
-    industryTrend
-    indexTrend
-    sectorTrend
+5. Компонент 'Portfolio' - отображает состояние акций портфеля с базовыми мультипликаторами и показателем с Yahoo Finance
    
-Пример использования: https://query1.finance.yahoo.com/v10/finance/quoteSummary/$TICKER?modules=$MODULE_NAME , 
-где вместо $MODULE_NAME подставляем нужный нам модуль, а вместо TICKER - соответственно, тикер.
+   Компонент 'RealTime Search' - отображает справочник тикеров, требуемый в соответствии с тем, что тикеры на Российких биржах и на 
+   биржах, которыми оперирует Yahoo, могут отличаться. Здесь можно проверить акцию из справочника на мультипликаторы Yahoo Finance.
+   
+   Компонент 'Full Market Analysis' - позволяет запустить поиск по всем акциям из справочника с указанием нижнеко порога recommendations
+   из Yahoo Finance.
+   
+TODO: 
+ - авторизация и аутентификация
+ - рассмотреть возможность подключения торгового робота с написанием к нему пользовательского интерфейса
+ - переделать поиск акций в компоненте 'Full Market Analysis' с сохранением данных об акциях и последующих анализом динамики изменения мультипликаторов
 
-    https://query1.finance.yahoo.com/v10/finance/quoteSummary/BK?modules=financialData
 
-Мы испольуем ограниченное количество информации от Yahoo (параметры, которые отмечены знаком +), для собственного удобства опишу структуру JSON
+ДИСКЛЕЙМЕР:
 
-defaultKeyStatistics:
-    quoteSummary
-        result (Array)
-            defaultKeyStatistics
-                enterpriseValue + 
-                forwardPE +
-                priceToBook +
-                enterpriseToEbitda +
-                trailingEps       
-                forwardEps
-                enterpriseToRevenue
-                и многое другое...
-
-summaryDetail
-    quoteSummary
-        result (Array)
-            summaryDetail
-                dividendYield +
-                trailingPE +
-                forwardPE +
-                marketCap +
-                priceToSalesTrailing12Months + 
-                previousClose
-                open
-                dayLow
-                dayHigh                        
-                и многое другое...
-
-financialData
-        quoteSummary
-            result (Array)
-                financialData
-                    recommendationMean +
-                    returnOnEquity +
-                    totalCash
-                    totalCashPerShare
-                    totalDebt
-                    returnOnAssets
-                    operatingCashflow
-                    revenueGrowth
-                    и многое другое...
-                                
-            
+Данное программное обеспечение и информация, полученная из него, не являются индивидуальными инвестиционными рекомендациями, 
+и финансовые инструменты либо операции, упомянутые в нем, могут не соответствовать Вашему инвестиционному профилю и инвестиционным целям и ожиданиям. 
+Определение соответствия финансового инструмента либо операции Вашим интересам, инвестиционным целям, инвестиционному горизонту и уровню допустимого риска 
+является Вашей задачей. Разработчик не несет ответственности за возможные убытки в случае совершения операций либо инвестирования в финансовые инструменты, 
+упомянутые в данном приложении, и не рекомендует использовать указанную информацию в качестве единственного источника информации при принятии инвестиционного решения. 
